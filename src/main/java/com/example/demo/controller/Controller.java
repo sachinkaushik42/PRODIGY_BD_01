@@ -11,10 +11,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api/users") // Set base URL path to all endpoints
 public class Controller {
 
-
+    
     private final Map<Long, User> storage = new ConcurrentHashMap<>();
     
     //Handles incrementation as 1,2,3...
@@ -65,7 +65,7 @@ public class Controller {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
         
-        updatedUser.setId(id); // Keep the ID the same
+        updatedUser.setId(id); // Keep the id same 
         storage.put(id, updatedUser);
         return ResponseEntity.ok(updatedUser);
     }
