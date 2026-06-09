@@ -8,75 +8,56 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
 
 @RestController
-@RequestMapping("/api/users") // Set base URL path to all endpoints
+@RequestMapping("/api/users")
 public class Controller {
 
-    
-    private final Map<Long, User> storage = new ConcurrentHashMap<>();
-    
-    //Handles incrementation as 1,2,3...
-    private final AtomicLong counter = new AtomicLong(1);
+    // In-memory storage acting as our temporary database
+    private final Map<UUID, User> userStorage = new ConcurrentHashMap<>();
 
-    // Loads initial data 
-    @jakarta.annotation.PostConstruct
-    public void loadInitialData() {
-        User sysUser = new User();
-        Long firstId = counter.getAndIncrement(); // Gets 1
-        
-        sysUser.setId(firstId);
-        sysUser.setName("Sachin Kaushik");
-        sysUser.setEmail("sachinkaushik42567@gmail.com");
-        sysUser.setAge(23);
-        
-        storage.put(firstId, sysUser);
-    }
-
-    // Create   (Post)
+    // 1. Create (Post)
     @PostMapping
     public ResponseEntity<User> createUser(@Valid @RequestBody User user) {
-        Long newId = counter.getAndIncrement(); // Automatically assigns the next number like 2,3...
-        user.setId(newId); 
-        storage.put(newId, user);
-        return new ResponseEntity<>(user, HttpStatus.CREATED);
+        user.setId(UUID.randomUUID()); // Automatically generate unique id
+        userStorage.put(user.getId(), user);
+        return new ResponseEntity<>(user, HttpStatus.CREATED); 
     }
 
-    // Read All 
+    // 2. Read All (Get)
     @GetMapping
     public ResponseEntity<Collection<User>> getAllUsers() {
-        return ResponseEntity.ok(storage.values());
+        return ResponseEntity.ok(userStorage.values()); 
     }
 
-    // 3. Read one by one id 
+    // 3. Read One by One Id 
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable Long id) {
-        if (!storage.containsKey(id)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    public ResponseEntity<User> getUserById(@PathVariable UUID id) {
+        if (!userStorage.containsKey(id)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // Returns 404
         }
-        return ResponseEntity.ok(storage.get(id));
+        return ResponseEntity.ok(userStorage.get(id));
     }
 
-    // 4. Update 
+    // 4. Update
     @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable Long id, @Valid @RequestBody User updatedUser) {
-        if (!storage.containsKey(id)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    public ResponseEntity<User> updateUser(@PathVariable UUID id, @Valid @RequestBody User updatedUser) {
+        if (!userStorage.containsKey(id)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // Returns 404
         }
         
-        updatedUser.setId(id); // Keep the id same 
-        storage.put(id, updatedUser);
-        return ResponseEntity.ok(updatedUser);
+        updatedUser.setId(id); // Ensure the id remains unchanged
+        userStorage.put(id, updatedUser);
+        return ResponseEntity.ok(updatedUser); 
     }
 
     // 5. Delete 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-        if (!storage.containsKey(id)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    public ResponseEntity<Void> deleteUser(@PathVariable UUID id) {
+        if (!userStorage.containsKey(id)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); 
         }
-        storage.remove(id);
-        return ResponseEntity.noContent().build();
+        userStorage.remove(id);
+        return ResponseEntity.noContent().build(); 
     }
 }
