@@ -3,10 +3,10 @@ package com.example.demo.model;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
-
+import java.util.UUID;
 
 public class User {
-    private Long id;
+    private UUID id;
 
     @NotBlank(message = "Name cannot be empty")
     private String name;
@@ -21,7 +21,7 @@ public class User {
     // Constructors
     public User() {}
 
-    public User(Long id, String name, String email, int age) {
+    public User(UUID id, String name, String email, int age) {
         this.id = id;
         this.name = name;
         this.email = email;
@@ -29,8 +29,8 @@ public class User {
     }
 
     // Getters and Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public UUID getId() { return id; }
+    public void setId(UUID id) { this.id = id; }
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
